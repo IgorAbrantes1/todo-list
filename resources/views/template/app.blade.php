@@ -18,10 +18,35 @@
         <hr>
 
         <h2>{{ trans('Add new task') }}</h2>
-        <hr>
+        @if($errors->any())
+            <div class="alert alert-danger">
+                <ul class="list-unstyled">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form action="{{ route('/todos') }}" method="POST">
+            @csrf
+            <input type="text" class="form-control" name="task" placeholder="{{ trans('Add new task') }}"/>
+            <button class="btn btn-primary" type="submit">{{ trans('Store') }}</button>
+        </form>
+
 
         <h2>{{ trans('Pending tasks') }}</h2>
-        <hr>
+        @if(session('status'))
+            <div class="alert alert-success">
+                {{ session('status') }}
+            </div>
+        @endif
+
+        <ul class="list-group list-unstyled">
+            @foreach($todos as $todo)
+                <li class="list-group-item">{{ $todo->task }}</li>
+            @endforeach
+        </ul>
 
         <h2>{{ trans('Completed Tasks') }}</h2>
 
