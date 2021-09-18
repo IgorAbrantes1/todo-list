@@ -45,11 +45,11 @@ class TodoController extends Controller
         ]);
 
         if (!$payload)
-            return redirect('/')->with('errors', 'Bad Request!');
+            return redirect(route('todo.index'))->with('errors', 'Bad Request!');
 
         Todo::create($payload);
 
-        return redirect('/')->with('status', 'Task added!');
+        return redirect(route('todo.index'))->with('status', 'Task added!');
     }
 
     /**
@@ -79,21 +79,51 @@ class TodoController extends Controller
      *
      * @param Request $request
      * @param int $id
-     * @return Response
+     * @return RedirectResponse
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id): RedirectResponse
     {
-        //
+        $todo = Todo::all()->where('id', '=', $id)->first();
+
+        if (!$todo)
+            return redirect(route('todo.index'));
+
+        $payload = $request->validate([
+            'task' => 'required|max:200'
+        ]);
+
+        if (!$payload)
+            return redirect(route('todo.index'));
+
+        if ($payload['task'] === $todo->task)
+            return redirect(route('todo.index'));
+
+        $taskAnt = $todo->task;
+        $todo->update($payload);
+
+        return redirect(route('todo.index'))->with([
+            'status' => "Task updated with successful! '" . $taskAnt . "' to '" . $todo->task . "'",
+            'task' => $todo->task
+        ]);
     }
 
     /**
      * Remove the specified resource from storage.
      *
      * @param int $id
-     * @return Response
+     * @return RedirectResponse
      */
-    public function destroy($id)
+    public function destroy(int $id): RedirectResponse
     {
-        //
+        $todo = Todo::all()->where('id', '=', $id)->first();
+
+        if (!$todo)
+            return redirect(route('todo.index'));
+
+        $todo->update([
+            'status' => false
+        ]);
+
+        return redirect(route('todo.index'))->with('status', "Task '$todo->task' removed!");
     }
 }
